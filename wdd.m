@@ -1,10 +1,10 @@
 clc;
 clear;
-alpha = 0;
+alpha = 0.5;
 mu = [0.2 0.5 0.7];
 Sigma_T = [0.5; 0.8; 1];
-Sigma_S = [0.1 0.3 0.1; 0 0.1 0.3; 0 0.1 0.3];
-Qe = [1.5; 0; 0.2];
+Sigma_S = [0.1 0.0 0.0; 0.3 0.1 0.1; 0.1 0.3 0.3];
+Qe = [1.5; 0; 0.2]; 
 delta = .1;
 
 x_i = 0;
@@ -36,16 +36,16 @@ while RelativeError > 1e-4
         Psi_half(1) = 0;
         end
         S(i) = Sigma_S(k,1) * Psi(i) + Sigma_S(k,2) * Psi(i) + Sigma_S(k,3) * Psi(i) + Qe(k);
-        Psi(i) = ( S(i) + (2*abs(mu)*Psi_half(i))/((1+alpha)*delta) ) / ( Sigma_T(k) + ( (2*abs(mu)) / ((1+alpha)*delta) ) );
+        Psi(i) = ( S(i) + (2*abs(mu(h))*Psi_half(i))/((1+alpha)*delta) ) / ( Sigma_T(k) + ( (2*abs(mu(h))) / ((1+alpha)*delta) ) );
         Psi_half(i+1) = ( (2*Psi(i)) / (1+alpha) ) - ( ( (1-alpha)/(1+alpha) ) * Psi_half(i));
     end
     
-    Psi_half_reverse = fliplr(Psi_half);    
-    S_reverse = fliplr(S);
+    Psi_half_reverse(1) = Psi_half(i+1);    
+    
     
     for i = 1:length(Psi_reverse)
         S_reverse(i) = Sigma_S(k,1) * Psi(i) + Sigma_S(k,2) * Psi(i) + Sigma_S(k,3) * Psi(i) + Qe(k);
-        Psi_reverse(i) = ( S_reverse(i) + (2*abs(mu)*Psi_half_reverse(i))/((1-alpha)*delta) ) / ( Sigma_T(k) + ( (2*abs(mu)) / ((1-alpha)*delta) ) );
+        Psi_reverse(i) = ( S_reverse(i) + (2*abs(mu(h))*Psi_half_reverse(i))/((1-alpha)*delta) ) / ( Sigma_T(k) + ( (2*abs(mu(h))) / ((1-alpha)*delta) ) );
         Psi_half_reverse(i+1) = ( (2*Psi_reverse(i)) / (1-alpha) ) - ( ( (1+alpha)/(1-alpha) ) * Psi_half_reverse(i));
     end
     
@@ -70,7 +70,8 @@ end
 PS = PS + Psi;
 PSR = PSR + Psi_reverse;
 Psi = PS;
-
+Psi_half = zeros(1,n);
+Psi_half_reverse = zeros(1,n);
 end
 
 Psi = PS + PSR;
@@ -79,4 +80,5 @@ hold on
 str = sprintf('Graph at \\Delta %f and \\alpha %f', delta, alpha);
 grid on
 title(str);
+legend({'Group 1','Group 2','Group 3'});
 end
